@@ -6,6 +6,7 @@ const connection = require("./db");
 const userRoutes = require("./routes/users");
 const authRoutes = require("./routes/auth");
 const scheduleRoutes = require("./routes/userSchedule");
+const employeeRoutes = require("./routes/employee");
 const passwordResetRoutes = require("./routes/passwordReset");
 var nodemailer = require("nodemailer");
 
@@ -36,7 +37,9 @@ app.use(cors());
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api", scheduleRoutes);
+app.use("/api/employee", employeeRoutes);
 app.use("/api/password-reset", passwordResetRoutes);
+
 
 
 app.use("api/data", (req, res) => {

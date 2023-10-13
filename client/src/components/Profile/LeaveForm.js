@@ -11,7 +11,9 @@ import {
   Grid,
 } from "@mui/material";
 import axios from "axios";
-import DatePicker from '../UI/DatePicker/DatePickerField'
+// import DateRangePicker from '../UI/DatePicker/DatePickerField'
+import DateRangePicker from '../UI/DatePicker/DatePickerField'
+import FileUploader from './FileUploader'
 
 
 
@@ -20,36 +22,61 @@ function LeaveApplicationForm () {
     const [numberOfDays, setNumberOfDays] = useState("");
     const [status, setStatus] = useState("pending");
   
-    const handleSubmit = async (event) => {
-        event.preventDefault();
-        const id = localStorage.getItem('userid');
-      
-        try {
-          // Create a data object to send in the request
-          const data = {
-            leaveType,
-            numberOfDays,
-            status,
-            id
-          };
-      
-          // Make a POST request to your server endpoint
-          const response = await axios.post("http://localhost:8080/api/apply-leave", data);
-      
-          if (response.status === 201) {
-            // Successful response, you can handle it here
-            console.log("Leave application submitted successfully");
-            // Reset the form fields
-            setLeaveType("");
-            setNumberOfDays("");
-            setStatus("pending");
-          }
-        } catch (error) {
-          console.error("Error submitting leave application:", error);
-          // Handle the error here, e.g., show an error message to the user
-        }
-      };
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    const [selectedDateRange, setSelectedDateRange] = useState({
+      startDate: null,
+      endDate: null,
+    });
   
+    // Define a function to update the selectedDateRange
+    const handleDateRangeChange = (startDate, endDate) => {
+      setSelectedDateRange({ startDate, endDate });
+    };
+
+    const handleFileUpload = (file) => {
+      setSelectedFile(file);
+      console.log(file)
+    };
+  
+    const handleSubmit = async (event) => {
+      event.preventDefault();
+      const id = localStorage.getItem("userid");
+  
+      try {
+        // Create a FormData object to send the file
+        const formData = new FormData();
+        formData.append("leaveType", leaveType);
+        formData.append("numberOfDays", numberOfDays);
+        formData.append("status", status);
+        formData.append("id", id);
+        formData.append("pdfFile", selectedFile);
+  
+        // Make a POST request to your server endpoint
+        const response = await axios.post(
+          "http://localhost:8080/api/apply-leave",
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+  
+        if (response.status === 201) {
+          // Successful response, you can handle it here
+          console.log("Leave application submitted successfully");
+          // Reset the form fields
+          setLeaveType("");
+          setNumberOfDays("");
+          setStatus("pending");
+          setSelectedFile(null);
+        }
+      } catch (error) {
+        console.error("Error submitting leave application:", error);
+        // Handle the error here, e.g., show an error message to the user
+      }
+    };
     return (
       <Container maxWidth="sm">
         <Typography variant="h4" align="center" gutterBottom>
@@ -77,7 +104,27 @@ function LeaveApplicationForm () {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-           < DatePicker />
+           {/* < DatePicker startDate={} endDate={} /> */}
+           <div>
+           <DateRangePicker
+        startDate={selectedDateRange.startDate}
+        endDate={selectedDateRange.endDate}
+        onDateChange={handleDateRangeChange}
+      />
+           </div>
+           
+          
+            </Grid>
+
+            <Grid item xs={12}  style={{
+            // border: "1px solid #666666",
+            borderRadius: "5px",
+            borderColor: "#666666",
+            // padding: "2%",
+            height: "3rem",
+          }}>
+          
+            <FileUploader onFileUpload={handleFileUpload} />
             </Grid>
           
             <Grid item xs={12}>
